@@ -63,10 +63,10 @@ public class StupidVovnBot extends TelegramLongPollingBot{
 		return name_bot; // тут хуячим имя бота
 	}
  
-	@Override
 	public String getBotToken() {
 		return token; // здеся токен
 	}
+	
 	
 	public JButton button_0;
 	public JButton button_1;
@@ -74,6 +74,7 @@ public class StupidVovnBot extends TelegramLongPollingBot{
 	public static JInternalFrame frame1;
 	public static String token;
 	public static String name_bot;
+	public static String id_admin;
 	public static void main(String[] args) { 
 		File configFile = new File("config.properties");
 		
@@ -83,19 +84,26 @@ public class StupidVovnBot extends TelegramLongPollingBot{
 		    Properties props = new Properties();
 		    props.load(reader);
 		    
-			if (empty(props.getProperty("name_bot")) && empty(props.getProperty("token"))) {
+			if (empty(props.getProperty("name_bot")) && empty(props.getProperty("token")) && empty(props.getProperty("id_admin"))) {
 				// set the properties value
+				if (empty(props.getProperty("name_bot"))) {
 				props.setProperty("name_bot", "Put name of bot here");
+				}
+				if (empty(props.getProperty("token"))) {
 				props.setProperty("token", "Put token of bot here");
-
-				JOptionPane.showMessageDialog(null, "Обнови конфигурационный файл!\nПрограмма закрывается.");
+				}
+				if (empty(props.getProperty("id_admin"))) {
+				props.setProperty("id_admin", "Put id admin of bot here");
+				}
+				JOptionPane.showMessageDialog(null, "Обнови конфигурационный файл! Он находится в той же директории, где лежит бот.\nПрограмма закрывается.");
 				FileWriter writer = new FileWriter(configFile);
 			    props.store(writer, "settings");
 				writer.close();	
 				System.exit(0);
-			}else if (!empty(props.getProperty("name_bot")) && !empty(props.getProperty("token"))){
+			}else if (!empty(props.getProperty("name_bot")) && !empty(props.getProperty("token")) && !empty(props.getProperty("id_admin"))){
 				token = props.getProperty("token");
 				name_bot = props.getProperty("name_bot");
+				id_admin = props.getProperty("id_admin");
 			}
 
 
@@ -204,6 +212,9 @@ public class StupidVovnBot extends TelegramLongPollingBot{
 		JMenu help = new JMenu("Помощь");
 		menubar.add(help);
 		help.add(Информация_о_суициднике);
+		JMenu debug = new JMenu("Дебаг");
+		menubar.add(debug);
+		debug.add(showallstrings);
 		okno.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		okno.setLocationRelativeTo(null);
 		okno.setVisible(true);
@@ -236,6 +247,16 @@ public class StupidVovnBot extends TelegramLongPollingBot{
 		}
 	};
 	
+	static Action showallstrings = new AbstractAction("Показать все переменные"){
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			JOptionPane.showMessageDialog(null, "Токен: " + token + 
+					"\nИмя бота: " + name_bot +
+					"\nАйди администратора: " + id_admin);
+		}
+	};
+	
 	
 	static Action Информация_о_суициднике = new AbstractAction("О программе"){
 		@Override
@@ -247,16 +268,12 @@ public class StupidVovnBot extends TelegramLongPollingBot{
 	private static JTextField text_message;
 	private static JTextField textField;
 	
-	
-	
-	
-	
- 
 	@Override
 	public void onUpdateReceived(Update update) {
 		String text = logs.getText();
 		Message message = update.getMessage();
 		String vzhuh_command_check = null;
+		
 		if (message != null && message.hasText()) { // тут все команды 
 			if (message.getText().equals("/start") || message.getText().equals("/start@"+getBotUsername())){
 				logsSetText("У меня новый пользователь! Yay! Chat ID: "+message.getChatId().toString());
@@ -310,6 +327,27 @@ public class StupidVovnBot extends TelegramLongPollingBot{
 				statusVova = new String("не задал что он сейчас делает. Я без понятия что он делает сейчас. Чесно. ");
 			}
 			sendMsg(message, "А Вова "+statusVova, 0, 0, 1);
+		}else if (message.getText().startsWith("/status_set@"+getBotUsername(), 0) == true || message.getText().startsWith("/status_set", 0) == true){
+			if(message.getFrom().getId() == Integer.parseInt(id_admin) ) {
+			String status1 = null;
+			if (message.getText().startsWith("/status_set@"+getBotUsername(), 0) == true) {
+				status1 = message.getText().replace("/status_set@"+getBotUsername(), "");
+			}else if(message.getText().startsWith("/status_set", 0) == true) {
+				status1 = message.getText().replace("/status_set ", "");
+			}
+			logsSetText("Поставил другой статус! Chat ID: "+message.getChatId().toString());
+			sendMsg(message, "Поставил!", 1, 1, 1);
+			statusVova = new String(status1);
+			textFieldVova.setText(status1);
+			}else {
+				sendMsg(message, "Вы не имеете права использовать эту команду!", 1, 1, 1);
+				logsSetText("Чувак "+ message.getFrom().getId()+ " пытался изменить статус! Хотя админ это "+id_admin+". Chat ID: "+message.getChatId().toString());
+			}
+		}else if (message.getText().startsWith("/version@"+getBotUsername(), 0) == true || message.getText().startsWith("/version", 0) == true){
+			logsSetText("Расскрываю свой потанцевал! Chat ID: "+message.getChatId().toString());
+			sendMsg(message, "*Доступные процессоры (ядра):* " + Runtime.getRuntime().availableProcessors()
+					+ "\n*Доступно памяти (в байтах):* " + Runtime.getRuntime().freeMemory() + 
+					"\n*Операционная система: *" + System.getProperty("os.name"), 0, 1, 1);
 		}
 			
 			
@@ -329,21 +367,16 @@ public class StupidVovnBot extends TelegramLongPollingBot{
 		}
 		if (kb == 1) {
 		sendMessage1.setChatId(message.getChatId().toString());
-		sendMessage1.setText(text);
-		try {
-			sendMessage(sendMessage1);
-		} catch (TelegramApiException e) {
-			e.printStackTrace();
-		}
 		}else{
-		sendMessage1.setChatId("137703694");
+		sendMessage1.setChatId(id_admin);
+		}
 		sendMessage1.setText(text);
 		try {
 			sendMessage(sendMessage1);
 		} catch (TelegramApiException e) {
 			e.printStackTrace();
 		}
-		}
+		
 		
 		
 	}
