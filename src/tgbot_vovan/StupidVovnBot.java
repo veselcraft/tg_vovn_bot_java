@@ -95,7 +95,7 @@ public class StupidVovnBot extends TelegramLongPollingBot{
 				if (empty(props.getProperty("id_admin"))) {
 				props.setProperty("id_admin", "Put id admin of bot here");
 				}
-				JOptionPane.showMessageDialog(null, "Обнови конфигурационный файл! Он находится в той же директории, где лежит бот.\nПрограмма закрывается.");
+				JOptionPane.showMessageDialog(null, "Обнови конфигурационный файл! Он находится в той же директории, где лежит бот.\nЕсли его не было, то он прямо сейчас появился.\nПрограмма закрывается.");
 				FileWriter writer = new FileWriter(configFile);
 			    props.store(writer, "settings");
 				writer.close();	
@@ -125,7 +125,7 @@ public class StupidVovnBot extends TelegramLongPollingBot{
 			logs.setFont(new Font("Monospaced", Font.PLAIN, 13)); // выставляю монохромный шрифт
 			logs.setText("["+t1+"] Включен");                     // вывожу сообщение о ВКЛЮЧЕНИИ БОТА!!!!!
 		} catch (TelegramApiException e) { // если нихуя не получается то выдаем иссключение и пишем это в консоль
-			JOptionPane.showMessageDialog(null, "Обнови конфигурационный файл!\nПрограмма закрывается.");
+			JOptionPane.showMessageDialog(null, "Ошибка подключения к серверу!\nВозможно, в вашей стране заблокирован Telegram или у вас отсутствует интернет.\nПрограмма закрывается.");
 			e.printStackTrace();
 		}
 		
@@ -133,15 +133,15 @@ public class StupidVovnBot extends TelegramLongPollingBot{
 									// я так знатно переебался с ним в 2017 году, но вполне нормально получилось
 									// если знаете жфрейм то в коде разберётесь в полне
 		JScrollPane scrollPane = new JScrollPane(logs, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		okno.setTitle("Бот Вована @vovn_bot - панель управления");
-		okno.setBounds(40, 50, 460, 400);
+		okno.setTitle("@"+name_bot+" - панель управления");
+		okno.setBounds(40, 50, 593, 400);
 		
 		scrollPane.setViewportBorder(BorderFactory.createLineBorder(Color.black));
         scrollPane.setWheelScrollingEnabled(true);
         
         JInternalFrame frame1 = new JInternalFrame("Логи бота", true, true, true,
                 true);
-        frame1.setBounds(0, 0, 230, 120);
+        frame1.setBounds(0, 0, 445, 238);
         frame1.getContentPane().add(scrollPane);
         frame1.setDefaultCloseOperation( JInternalFrame.DO_NOTHING_ON_CLOSE );
         frame1.pack();
@@ -151,7 +151,7 @@ public class StupidVovnBot extends TelegramLongPollingBot{
         desktopPane.setLayout(null);
         desktopPane.add(frame1);
         JInternalFrame frame2 = new JInternalFrame("Отправить сообщение", true, true, true, true);
-        frame2.setBounds(30,30,225,124);
+        frame2.setBounds(10,206,225,124);
         frame2.setVisible(true);
         frame2.setDefaultCloseOperation( JInternalFrame.DO_NOTHING_ON_CLOSE );
         frame2.getContentPane().setLayout(new GridLayout(0, 2, 0, 0));
@@ -171,7 +171,7 @@ public class StupidVovnBot extends TelegramLongPollingBot{
         text_message.setColumns(10);
         
         JButton button_0 = new JButton("Отправить");
-        frame2.add(button_0);
+        frame2.getContentPane().add(button_0);
         ListenerButton bl = new StupidVovnBot().new ListenerButton();
         button_0.addActionListener(bl);
         
@@ -179,7 +179,7 @@ public class StupidVovnBot extends TelegramLongPollingBot{
         
         JInternalFrame frame3 = new JInternalFrame("А Вова...", true, true, true, true); // мог бы я ещё сделать веб интерфейс который записывает что делает вова и записывать в текстовой фалй
         																					// а софтинка бы могла поймать этот файлик и туда записать то, что я дрочу. но чёт пиздец лень
-        frame3.setBounds(160,160,282,102);
+        frame3.setBounds(285,228,282,102);
         frame3.setDefaultCloseOperation( JInternalFrame.DO_NOTHING_ON_CLOSE );
         frame3.setVisible(true);
         
@@ -328,7 +328,7 @@ public class StupidVovnBot extends TelegramLongPollingBot{
 			}
 			sendMsg(message, "А Вова "+statusVova, 0, 0, 1);
 		}else if (message.getText().startsWith("/status_set@"+getBotUsername(), 0) == true || message.getText().startsWith("/status_set", 0) == true){
-			if(message.getFrom().getId() == Integer.parseInt(id_admin) ) {
+			if(message.getFrom().getId() == Integer.parseInt(id_admin)) {
 			String status1 = null;
 			if (message.getText().startsWith("/status_set@"+getBotUsername(), 0) == true) {
 				status1 = message.getText().replace("/status_set@"+getBotUsername(), "");
